@@ -10,13 +10,33 @@ public class DecorGen : MonoBehaviour
     [SerializeField] private List<GameObject> parts;
     [SerializeField] private GameObject selected;
     [SerializeField] private GameObject render;
+    [SerializeField] private Rigidbody rigidbody;
+
+    [SerializeField] private Chunk chunk;
+    [SerializeField] private bool rocky = false;
+    [SerializeField] private bool frozenY = true;
+
+    [SerializeField] private float lifetime = 1.0f;
+
+    public void SetChunk(Chunk c)
+    {
+        this.chunk = c;
+    }
 
 
     // Start is called before the first frame update
     void Start()
     {
-        selected = forestDecor[Mathf.FloorToInt(Random.Range(0.0f, 20.99f))];
+        rigidbody = GetComponent<Rigidbody>();
+        int i = Mathf.FloorToInt(Random.Range(0.0f, 20.99f));
+        if (i > 11)
+        {
+            rocky = true;
+        }
+        SetConstraints(rocky, frozenY);
+        selected = forestDecor[i];
         render = Instantiate(selected, transform);
+        render.transform.Rotate(0, Random.Range(0.0f, 360.0f), 0);
         Parts(render);
         CreateCollider();
     }
@@ -24,7 +44,64 @@ public class DecorGen : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        
+        if(lifetime < 0.0f)
+        {
+            Destroy(gameObject);
+        }
+        if (rigidbody != null)
+        {
+            if(rigidbody.velocity.y > 0.1)
+            {
+                rigidbody.velocity = new Vector3(0, -0.1f, 0);
+            } 
+            if(this.frozenY)
+            {
+                if(chunk.terrain.activeInHierarchy)
+                {
+                    this.frozenY = false;
+                    SetConstraints(rocky, frozenY);
+                }
+            }
+            else
+            {
+                lifetime -= Time.deltaTime;
+            }
+        }
+    }
 
+
+    void SetConstraints(bool rock, bool y)
+    {
+        if (rock)
+        {
+            rigidbody.constraints = y ? RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionY
+                : RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezePositionX ;
+        }
+        else
+        {
+            rigidbody.constraints = y ? RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionY
+                | RigidbodyConstraints.FreezeRotationZ | RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY 
+                : RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezePositionX 
+                | RigidbodyConstraints.FreezeRotationZ | RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY;
+
+        }
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        if(collision.gameObject.tag == "Floor")
+        {
+            //do something like this for NPC chunk assigning
+            StartCoroutine(Assign(collision.gameObject));
+        }
+        if (collision.gameObject.tag == "Decor")
+        {
+            if(collision.transform.parent.name != "DecorHolder")
+            {
+                StartCoroutine(Assign(collision.transform.parent.gameObject));
+            }
+        }
     }
 
 
@@ -38,8 +115,8 @@ public class DecorGen : MonoBehaviour
             collide.transform.localRotation = part.transform.rotation;
             collide.transform.parent = transform;
             MeshCollider collider = collide.AddComponent<MeshCollider>() as MeshCollider;
-            collider.sharedMesh = part.GetComponent<MeshFilter>().sharedMesh;
             collider.convex = true;
+            collider.sharedMesh = part.GetComponent<MeshFilter>().sharedMesh;
 
 
         }
@@ -59,6 +136,17 @@ public class DecorGen : MonoBehaviour
             }
         }
         
+    }
+
+    IEnumerator Assign(GameObject obj)
+    {
+        yield return new WaitForSeconds(0.5f);
+        this.transform.parent = obj.transform;
+        if (rigidbody != null)
+        { 
+            Destroy(rigidbody);
+        }
+        yield return true;
     }
 
 }

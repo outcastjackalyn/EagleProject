@@ -47,6 +47,9 @@ MonoBehaviour:
   genDist: 2
   player: {fileID: 0}
   chunks: []
-  chunkLength: 19
+  chunkLength: 18
   gridPos: {x: 0, y: 0}
-  grasslands: {fileID: 1032551483747090, guid: ef140beec582a5a46a6362fcfc31784d, type: 3}
+  grasslands: {fileID: 557702331317059499, guid: 669cac5283161d242a1b9b8f95b9dd23,
+    type: 3}
+  surface: {fileID: 0}
+  decor: {fileID: 156392194686274717, guid: 6f66f72679649474f836ea8a42723460, type: 3}

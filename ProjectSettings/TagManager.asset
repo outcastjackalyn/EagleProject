@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - Decor
+  - Floor
   layers:
   - Default
   - TransparentFX
