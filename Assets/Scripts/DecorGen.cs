@@ -14,9 +14,12 @@ public class DecorGen : MonoBehaviour
 
     [SerializeField] private Chunk chunk;
     [SerializeField] private bool rocky = false;
+    [SerializeField] private bool tree = false;
     [SerializeField] private bool frozenY = true;
+    [SerializeField] private bool hit = false;
 
-    [SerializeField] private float lifetime = 1.0f;
+
+    [SerializeField] private float lifetime = 2.0f;
 
     public void SetChunk(Chunk c)
     {
@@ -29,9 +32,15 @@ public class DecorGen : MonoBehaviour
     {
         rigidbody = GetComponent<Rigidbody>();
         int i = Mathf.FloorToInt(Random.Range(0.0f, 20.99f));
-        if (i > 11)
+        if (i < 9)
         {
             rocky = true;
+            this.transform.Translate(0f, 0.5f, 0f);
+
+        }
+        if(i > 17)
+        {
+            tree = true;
         }
         SetConstraints(rocky, frozenY);
         selected = forestDecor[i];
@@ -39,13 +48,14 @@ public class DecorGen : MonoBehaviour
         render.transform.Rotate(0, Random.Range(0.0f, 360.0f), 0);
         Parts(render);
         CreateCollider();
+        render.SetActive(false);
     }
 
     // Update is called once per frame
     void Update()
     {
         
-        if(lifetime < 0.0f)
+        if(lifetime < 0.0f && transform.parent.name == "DecorHolder")
         {
             Destroy(gameObject);
         }
@@ -97,7 +107,8 @@ public class DecorGen : MonoBehaviour
         }
         if (collision.gameObject.tag == "Decor")
         {
-            if(collision.transform.parent.name != "DecorHolder")
+            hit = true;
+            if (collision.transform.parent.name != "DecorHolder")
             {
                 StartCoroutine(Assign(collision.transform.parent.gameObject));
             }
@@ -140,11 +151,21 @@ public class DecorGen : MonoBehaviour
 
     IEnumerator Assign(GameObject obj)
     {
+        //Debug.Log("assign to chunk " + obj.name);
         yield return new WaitForSeconds(0.5f);
-        this.transform.parent = obj.transform;
         if (rigidbody != null)
-        { 
+        {
+            if (rigidbody.angularVelocity.magnitude > 1)
+            {
+                yield return new WaitForSeconds(0.5f);
+            }
+            render.SetActive(true);
             Destroy(rigidbody);
+            if(tree)
+            {
+                this.transform.Translate(0f, -0.5f, 0f);
+            }
+            this.transform.parent = obj.transform;
         }
         yield return true;
     }
