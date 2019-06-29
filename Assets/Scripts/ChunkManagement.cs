@@ -35,6 +35,7 @@ public class ChunkManagement : MonoBehaviour
     [SerializeField] private GameObject grasslands;
     [SerializeField] private GameObject surface;
     [SerializeField] private GameObject decor;
+    [SerializeField] private GameObject food;
     [SerializeField] private GameObject decorholder;
 
     private float radius = 2.0f;
@@ -173,21 +174,24 @@ public class ChunkManagement : MonoBehaviour
         int angle = 90 * Mathf.FloorToInt(Random.Range(0.0f, 4.0f));
         grasslands.transform.Rotate(0, angle, 0);
         Instantiate(grasslands, chunk.terrain.transform);
-        foreach (Vector3 v in DecorLocs())
+        foreach (Vector3 v in SpreadLocs(Mathf.FloorToInt(Random.Range(7.5f, 11.5f))))
         {
             GameObject d = Instantiate(decor, v + pos, Quaternion.identity);
             d.transform.parent = decorholder.transform;
-            //d.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezeZ | RigidbodyConstraints.FreezePositionX;
             d.GetComponent<DecorGen>().SetChunk(chunk);
         }
-
+        foreach (Vector3 v in SpreadLocs(Mathf.FloorToInt(Random.Range(1.5f, 3.5f))))
+        {
+            GameObject f = Instantiate(food, v + pos, Quaternion.identity);
+            f.transform.parent = decorholder.transform;
+            f.GetComponent<FoodGen>().SetChunk(chunk);
+        }
     }
 
-    List<Vector3> DecorLocs()
+    List<Vector3> SpreadLocs(int count)
     {
         List<Vector3> locs = new List<Vector3>();
         float[] pos = new float[2];
-        int count = Mathf.FloorToInt(Random.Range(7.5f, 11.5f));
         for(int i = 0; i < count; i++)
         {
             pos = checkPos(locs);

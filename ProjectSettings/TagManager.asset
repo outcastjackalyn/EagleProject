@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Decor
   - Floor
+  - Food
   layers:
   - Default
   - TransparentFX

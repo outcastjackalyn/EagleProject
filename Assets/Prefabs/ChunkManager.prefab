@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   renderDist: 4
-  genDist: 2
+  genDist: 0
   player: {fileID: 0}
   chunks: []
   chunkLength: 18
@@ -53,3 +53,5 @@ MonoBehaviour:
     type: 3}
   surface: {fileID: 0}
   decor: {fileID: 156392194686274717, guid: 6f66f72679649474f836ea8a42723460, type: 3}
+  food: {fileID: 6641478792352112330, guid: 2894bbd761183814a8854b0107d64ed2, type: 3}
+  decorholder: {fileID: 0}

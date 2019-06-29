@@ -10,7 +10,14 @@ public enum NPCType
     SHEEP
 }
 
+public enum NPCState
+{
+    IDLE,
+    HUNGRY,
+    SLEEPING,
+    SCARED,
 
+}
 
 
 public class NPC : MonoBehaviour

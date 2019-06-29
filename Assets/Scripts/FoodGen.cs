@@ -2,24 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DecorGen : MonoBehaviour
+public class FoodGen : MonoBehaviour
 {
-
-
-    [SerializeField] public List<GameObject> forestDecor;
-    [SerializeField] private List<GameObject> parts;
+    [SerializeField] public List<GameObject> fruits;
     [SerializeField] private GameObject selected;
     [SerializeField] private GameObject render;
     [SerializeField] private Rigidbody rigidbody;
 
     [SerializeField] private Chunk chunk;
-    [SerializeField] private bool rocky = false;
-    [SerializeField] private bool tree = false;
-    [SerializeField] private bool frozenY = true;
+    [SerializeField] private bool frozen = true;
     [SerializeField] private bool hit = false;
+    private float scale = 3f;
 
-
-    [SerializeField] private float lifetime = 2.0f;
+    [SerializeField] private float lifetime = 5.0f;
 
     public void SetChunk(Chunk c)
     {
@@ -31,22 +26,13 @@ public class DecorGen : MonoBehaviour
     void Start()
     {
         rigidbody = GetComponent<Rigidbody>();
-        int i = Mathf.FloorToInt(Random.Range(0.0f, 20.99f));
-        if (i < 9)
-        {
-            rocky = true;
-            this.transform.Translate(0f, 0.5f, 0f);
-
-        }
-        if(i > 17)
-        {
-            tree = true;
-        }
-        SetConstraints(rocky, frozenY);
-        selected = forestDecor[i];
+        int i = Mathf.FloorToInt(Random.Range(0.0f, 8.99f));
+        SetConstraints(frozen);
+        selected = fruits[i];
         render = Instantiate(selected, transform);
         render.transform.Rotate(0, Random.Range(0.0f, 360.0f), 0);
-        Parts(render);
+        //Parts(render);
+        render.transform.localScale += new Vector3(scale, scale, scale);
         CreateCollider();
         render.SetActive(false);
     }
@@ -65,12 +51,12 @@ public class DecorGen : MonoBehaviour
             {
                 rigidbody.velocity = new Vector3(0, -0.1f, 0);
             } 
-            if(this.frozenY)
+            if(this.frozen)
             {
                 if(chunk.terrain.activeInHierarchy)
                 {
-                    this.frozenY = false;
-                    SetConstraints(rocky, frozenY);
+                    this.frozen = false;
+                    SetConstraints(frozen);
                 }
             }
             else
@@ -81,20 +67,15 @@ public class DecorGen : MonoBehaviour
     }
 
 
-    void SetConstraints(bool rock, bool y)
+    void SetConstraints(bool f)
     {
-        if (rock)
+        if (f)
         {
-            rigidbody.constraints = y ? RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionY
-                : RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezePositionX ;
+            rigidbody.constraints = RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionY;
         }
         else
         {
-            rigidbody.constraints = y ? RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionY
-                | RigidbodyConstraints.FreezeRotationZ | RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY 
-                : RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezePositionX 
-                | RigidbodyConstraints.FreezeRotationZ | RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY;
-
+            rigidbody.constraints = RigidbodyConstraints.None;
         }
     }
 
@@ -102,15 +83,22 @@ public class DecorGen : MonoBehaviour
     {
         if(collision.gameObject.tag == "Floor")
         {
+            //Debug.Log("hit floor boss");
             //do something like this for NPC chunk assigning
             StartCoroutine(Assign(collision.gameObject));
+        }
+
+        if (collision.gameObject.tag == "Animal")
+        {
+            StartCoroutine(Eat(collision.gameObject));
         }
         if (collision.gameObject.tag == "Decor")
         {
             hit = true;
             if (collision.transform.parent.name != "DecorHolder")
             {
-                StartCoroutine(Assign(collision.transform.parent.gameObject));
+                Debug.Log("hit something boss");
+                //StartCoroutine(Assign(collision.transform.parent.gameObject));
             }
         }
     }
@@ -118,22 +106,18 @@ public class DecorGen : MonoBehaviour
 
     void CreateCollider()
     {
-        foreach (GameObject part in parts)
-        {
-            GameObject collide = new GameObject();
-            collide.name = "DecorCollision";
-            collide.transform.localPosition = part.transform.position;
-            collide.transform.localRotation = part.transform.rotation;
-            collide.transform.parent = transform;
-            MeshCollider collider = collide.AddComponent<MeshCollider>() as MeshCollider;
-            collider.convex = true;
-            collider.sharedMesh = part.GetComponent<MeshFilter>().sharedMesh;
-
-
-        }
+        GameObject collide = new GameObject();
+        collide.name = "FoodCollision";
+        collide.transform.localPosition = render.transform.position;
+        collide.transform.localRotation = render.transform.rotation;
+        collide.transform.parent = transform;
+        MeshCollider collider = collide.AddComponent<MeshCollider>() as MeshCollider;
+        collider.convex = true;
+        collider.sharedMesh = render.GetComponent<MeshFilter>().sharedMesh;
+        collider.transform.localScale += new Vector3(scale, scale, scale);
     }
 
-    void Parts(GameObject obj)
+   /* void Parts(GameObject obj)
     {
         if(obj.GetComponent<MeshFilter>() != null)
         {
@@ -147,7 +131,7 @@ public class DecorGen : MonoBehaviour
             }
         }
         
-    }
+    }*/
 
     IEnumerator Assign(GameObject obj)
     {
@@ -161,13 +145,24 @@ public class DecorGen : MonoBehaviour
             }
             render.SetActive(true);
             Destroy(rigidbody);
-            if(tree)
-            {
-                this.transform.Translate(0f, -0.5f, 0f);
-            }
             this.transform.parent = obj.transform;
         }
         yield return true;
     }
-
+    IEnumerator Eat(GameObject obj)
+    {
+        //Debug.Log("assign to chunk " + obj.name);
+        yield return new WaitForSeconds(0.5f);
+        if (rigidbody != null)
+        {
+            if (rigidbody.angularVelocity.magnitude > 0.2)
+            {
+                yield return new WaitForSeconds(0.5f);
+            }
+            render.SetActive(true);
+            Destroy(rigidbody);
+            this.transform.parent = obj.transform;
+        }
+        yield return true;
+    }
 }
