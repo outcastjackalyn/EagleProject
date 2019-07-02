@@ -146,9 +146,15 @@ public class FoodGen : MonoBehaviour
             render.SetActive(true);
             Destroy(rigidbody);
             this.transform.parent = obj.transform;
+            gameObject.GetComponentInChildren<MeshCollider>().isTrigger = true;
         }
         yield return true;
     }
+
+
+
+
+    //do something else 
     IEnumerator Eat(GameObject obj)
     {
         //Debug.Log("assign to chunk " + obj.name);

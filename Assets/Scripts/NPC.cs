@@ -4,10 +4,10 @@ using UnityEngine;
 
 public enum NPCType
 {
-    CAT,
-    DUCK,
-    PENGUIN,
-    SHEEP
+    CAT = 0,
+    DUCK = 1,
+    PENGUIN = 2,
+    SHEEP = 3
 }
 
 public enum NPCState
@@ -22,13 +22,18 @@ public enum NPCState
 
 public class NPC : MonoBehaviour
 {
-
+    private NPCType type;
+    private NPCState state = NPCState.IDLE;
+    private List<GameObject> types;
+    private GameObject render;
     private float age = 0.0f;
+    private float hunger = 0.0f;
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        type = (NPCType) Mathf.FloorToInt(Random.Range(0.0f, 3.99f));
+        render = Instantiate(types[(int) type], this.transform);
     }
 
     // Update is called once per frame
@@ -36,4 +41,11 @@ public class NPC : MonoBehaviour
     {
         
     }
+
+
+    void changeState(NPCState current)
+    {
+
+    }
+
 }
