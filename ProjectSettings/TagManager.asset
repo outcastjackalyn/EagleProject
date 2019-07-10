@@ -8,6 +8,7 @@ TagManager:
   - Floor
   - Food
   - Sun
+  - NPC
   layers:
   - Default
   - TransparentFX
@@ -25,8 +26,8 @@ TagManager:
   - 
   - 
   - 
-  - 
-  - 
+  - Decor
+  - Food
   - 
   - 
   - 

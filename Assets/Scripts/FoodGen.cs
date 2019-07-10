@@ -13,6 +13,7 @@ public class FoodGen : MonoBehaviour
     [SerializeField] private bool frozen = true;
     [SerializeField] private bool hit = false;
     private float scale = 3f;
+    public float quality;
 
     [SerializeField] private float lifetime = 5.0f;
 
@@ -26,9 +27,10 @@ public class FoodGen : MonoBehaviour
     void Start()
     {
         rigidbody = GetComponent<Rigidbody>();
-        int i = Mathf.FloorToInt(Random.Range(0.0f, 8.99f));
+        int i = Random.Range(0,9);
         SetConstraints(frozen);
         selected = fruits[i];
+        quality = Random.Range(30.0f, 60.0f);
         render = Instantiate(selected, transform);
         render.transform.Rotate(0, Random.Range(0.0f, 360.0f), 0);
         //Parts(render);
@@ -88,10 +90,10 @@ public class FoodGen : MonoBehaviour
             StartCoroutine(Assign(collision.gameObject));
         }
 
-        if (collision.gameObject.tag == "Animal")
+        /*if (collision.gameObject.tag == "Animal")
         {
             StartCoroutine(Eat(collision.gameObject));
-        }
+        }*/
         if (collision.gameObject.tag == "Decor")
         {
             hit = true;
@@ -108,6 +110,7 @@ public class FoodGen : MonoBehaviour
     {
         GameObject collide = new GameObject();
         collide.name = "FoodCollision";
+        collide.layer = 17;
         collide.transform.localPosition = render.transform.position;
         collide.transform.localRotation = render.transform.rotation;
         collide.transform.parent = transform;
@@ -155,20 +158,11 @@ public class FoodGen : MonoBehaviour
 
 
     //do something else 
-    IEnumerator Eat(GameObject obj)
+    public IEnumerator Eat()
     {
         //Debug.Log("assign to chunk " + obj.name);
         yield return new WaitForSeconds(0.5f);
-        if (rigidbody != null)
-        {
-            if (rigidbody.angularVelocity.magnitude > 0.2)
-            {
-                yield return new WaitForSeconds(0.5f);
-            }
-            render.SetActive(true);
-            Destroy(rigidbody);
-            this.transform.parent = obj.transform;
-        }
+        // get eatsed
         yield return true;
     }
 }

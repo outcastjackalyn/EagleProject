@@ -31,7 +31,7 @@ public class DecorGen : MonoBehaviour
     void Start()
     {
         rigidbody = GetComponent<Rigidbody>();
-        int i = Mathf.FloorToInt(Random.Range(0.0f, 20.99f));
+        int i = Random.Range(0,21);
         if (i < 9)
         {
             rocky = true;
@@ -122,6 +122,7 @@ public class DecorGen : MonoBehaviour
         {
             GameObject collide = new GameObject();
             collide.name = "DecorCollision";
+            collide.layer = 16;
             collide.transform.localPosition = part.transform.position;
             collide.transform.localRotation = part.transform.rotation;
             collide.transform.parent = transform;
