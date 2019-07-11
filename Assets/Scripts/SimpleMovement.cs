@@ -6,8 +6,8 @@ public class SimpleMovement : MonoBehaviour
 {
     public List<Vector3> points;
     public float cornerStart = 3f;
-    public float speed = 5f;
-    public float cornerSpeed = 5f;
+    public float speed = 0.1f;
+    public float cornerSpeed = 0.1f;
     public bool move = true;
     private int number = 0;
     private Vector3 current;
@@ -16,7 +16,7 @@ public class SimpleMovement : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        number = 0;
     }
 
     // Update is called once per frame
@@ -27,11 +27,7 @@ public class SimpleMovement : MonoBehaviour
             current = transform.position;
             target = points[number];
             float dist = Vector3.Distance(current, target);
-            if (dist < 0.1f)
-            {
-                number++;
-            }
-            if (points.Count >= number + 1)
+            if (points.Count > number + 1)
             {
                 nextTarget = points[number + 1];
                 if (dist < cornerStart)
@@ -40,7 +36,16 @@ public class SimpleMovement : MonoBehaviour
                 }
 
             }
-            transform.position = Vector3.Lerp(current, target, speed);
+            if (dist < cornerStart)
+            {
+                number++;
+                if(number >= points.Count)
+                {
+                    move = false;
+                }
+            }
+            transform.LookAt(target);
+            transform.position = Vector3.MoveTowards(current, target, speed);
         }
 
         
