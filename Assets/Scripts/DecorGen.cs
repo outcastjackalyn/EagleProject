@@ -122,7 +122,7 @@ public class DecorGen : MonoBehaviour
         {
             GameObject collide = new GameObject();
             collide.name = "DecorCollision";
-            collide.layer = 16;
+            collide.layer = LayerMask.NameToLayer("Decor");
             collide.transform.localPosition = part.transform.position;
             collide.transform.localRotation = part.transform.rotation;
             collide.transform.parent = transform;

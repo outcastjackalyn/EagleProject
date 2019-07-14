@@ -33,6 +33,7 @@ public class NPC : MonoBehaviour
     [SerializeField] private float stuck = 0.0f;
     [SerializeField] private bool stopped = false;
     [SerializeField] private Vector3 target;
+    [SerializeField] private bool foodTarget = false;
     [SerializeField] private float previousDist = 0.0f;
     [SerializeField] private Sun sun;
 
@@ -136,47 +137,58 @@ public class NPC : MonoBehaviour
             //lay down
         }
 
+        if (newState != NPCState.SLEEPING)
+        {
+            stopped = false;
+            SetTarget();
+        }
         state = newState;
         yield return new WaitForSeconds(0.2f);
     }
 
     private void SetTarget()
     {
-        if(state == NPCState.HUNGRY && !stopped)
+        if(state == NPCState.HUNGRY && !foodTarget)
         {
             // find closest food transform.pos
+            Debug.Log("Quest for lunch!!!");
             findFood(1f);
-
+            foodTarget = true;
             //if stopped maybe try to idle for a while
         }
         else
         {
             //pick random nearby location 
             target = randomPos();
+            foodTarget = false;
         }
     }
 
     Vector3 findFood(float radius)
     {
-        LayerMask food = 17;
+        Debug.Log("looking in radius: " + radius.ToString());
+        LayerMask food = LayerMask.NameToLayer("Food");
         Collider[] found = Physics.OverlapSphere(transform.position, radius, food);
         if (found.Length > 0)
         {
+            Debug.Log("found this many: " + found.Length.ToString());
             float dist = 1000f;
             Vector3 pos = found[0].gameObject.transform.position;
+
             foreach(Collider c in found)
             {
                 if(Vector3.Distance(c.transform.position, transform.position) < dist)
                 {
                     dist = Vector3.Distance(c.transform.position, transform.position);
                     pos = c.gameObject.transform.position;
+                    Debug.Log(c.gameObject.name + " at " + pos);
                 }
             }
             return pos;
         }
         else
         {
-            Debug.Log("radius");
+            Debug.Log("looked in radius: " + radius.ToString());
             return findFood(radius++);
         }
     }
@@ -184,7 +196,7 @@ public class NPC : MonoBehaviour
 
     Vector3 randomPos()
     {
-        LayerMask decor = 16;
+        LayerMask decor = LayerMask.NameToLayer("Decor");
         Vector3 pos;
         float minDist = 10.0f;
         float xDist = Random.Range(-20f, 20f);
@@ -237,7 +249,7 @@ public class NPC : MonoBehaviour
     }
 
 
-    private void OnTriggerEnter(Collider collider)
+    void OnTriggerEnter(Collider collider)
     {
         if (collider.tag == "Food")
         {
@@ -252,7 +264,7 @@ public class NPC : MonoBehaviour
         float step = speed * Time.deltaTime;
         Vector3 flatTarget = new Vector3(target.x, 0.0f, target.z);
         transform.LookAt(flatTarget);
-        Vector3 flatishTarget = new Vector3(target.x, 0.25f, target.z);
+        Vector3 flatishTarget = new Vector3(target.x, 0.4f, target.z);
         transform.position = Vector3.MoveTowards(transform.position, flatishTarget, step);
     }
 

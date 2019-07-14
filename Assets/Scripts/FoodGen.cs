@@ -110,7 +110,8 @@ public class FoodGen : MonoBehaviour
     {
         GameObject collide = new GameObject();
         collide.name = "FoodCollision";
-        collide.layer = 17;
+        collide.layer = LayerMask.NameToLayer("Food");
+        collide.tag = "Food";
         collide.transform.localPosition = render.transform.position;
         collide.transform.localRotation = render.transform.rotation;
         collide.transform.parent = transform;
@@ -161,6 +162,7 @@ public class FoodGen : MonoBehaviour
     public IEnumerator Eat()
     {
         //Debug.Log("assign to chunk " + obj.name);
+        Debug.Log(" I am  got eatsed i promise!");
         yield return new WaitForSeconds(0.5f);
         // get eatsed
         yield return true;
