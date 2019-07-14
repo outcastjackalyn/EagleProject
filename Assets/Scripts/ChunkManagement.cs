@@ -94,7 +94,6 @@ public class ChunkManagement : MonoBehaviour
 
     void generateChunks()
     {
-        
         int size = renderDist + genDist;
         int x = Mathf.RoundToInt(gridPos.x);
         int z = Mathf.RoundToInt(gridPos.y);
@@ -110,7 +109,6 @@ public class ChunkManagement : MonoBehaviour
                     terrain.transform.position = pos;
                     terrain.name = "Terrain" + id.ToString();
                     terrain.transform.parent = surface.transform;
-                    //Instantiate(terrain, pos, Quaternion.identity);
                     Chunk chunk = new Chunk(id, i, j, terrain);
                     chunks.Add(chunk);
                     buildChunk(chunk, pos);
@@ -186,6 +184,7 @@ public class ChunkManagement : MonoBehaviour
             f.transform.parent = decorholder.transform;
             f.GetComponent<FoodGen>().SetChunk(chunk);
         }
+        // add npc spawning chance here
     }
 
     List<Vector3> SpreadLocs(int count)

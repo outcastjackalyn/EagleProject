@@ -163,7 +163,8 @@ public class FoodGen : MonoBehaviour
     {
         //Debug.Log("assign to chunk " + obj.name);
         Debug.Log(" I am  got eatsed i promise!");
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.05f);
+        Destroy(gameObject);
         // get eatsed
         yield return true;
     }

@@ -51,7 +51,7 @@ public class NPC : MonoBehaviour
     {
         if (targetReached() || stopped)
         {
-            SetTarget();
+            StartCoroutine(SetTarget());
             stopped = false;
         }
         if (state != NPCState.SLEEPING)
@@ -64,10 +64,12 @@ public class NPC : MonoBehaviour
                     float change = Vector3.Distance(target, transform.position) - previousDist;
                     if (change > -0.5f)
                     {
+                        Debug.Log("got stuck i guess boss");
                         stopped = true;
                     }
                     else
                     {
+                        Debug.Log("progressing with it boss");
                         stopped = false;
                     }
                     stuck = 0.0f;
@@ -78,11 +80,14 @@ public class NPC : MonoBehaviour
 
                     if (hunger < 0.0f)
                     {
+                        // i think this is the probalem line ??
+                       // Debug.Log("i tried to do this and...");
                         StartCoroutine(changeState(NPCState.HUNGRY));
                     }
                     else
                     {
                         hunger -= Time.deltaTime;
+                        StartCoroutine(changeState(NPCState.IDLE));
                     }
                 }
 
@@ -121,10 +126,17 @@ public class NPC : MonoBehaviour
     {
         if (newState == state)
         {
+            //Debug.Log("we decided to we already knew what we were doing boss");
             yield break;
+        }
+        if (newState == NPCState.HUNGRY)
+        {
+            Debug.Log("i'm feeling hungry i'm sure of it");
         }
         if(stopped && newState == NPCState.HUNGRY)
         {
+            Debug.Log("we were hungry but found an obstacle!");
+            foodTarget = false;
             state = NPCState.IDLE;
             yield break;
         }
@@ -139,35 +151,38 @@ public class NPC : MonoBehaviour
 
         if (newState != NPCState.SLEEPING)
         {
+            Debug.Log("we tried looking boss");
             stopped = false;
-            SetTarget();
+            StartCoroutine(SetTarget());
         }
         state = newState;
         yield return new WaitForSeconds(0.2f);
     }
 
-    private void SetTarget()
+    IEnumerator SetTarget()
     {
         if(state == NPCState.HUNGRY && !foodTarget)
         {
             // find closest food transform.pos
             Debug.Log("Quest for lunch!!!");
-            findFood(1f);
+            target = findFood(1f);
             foodTarget = true;
             //if stopped maybe try to idle for a while
         }
         else
         {
+            Debug.Log("maybe we go this way?");
             //pick random nearby location 
             target = randomPos();
             foodTarget = false;
         }
+        yield return true;
     }
 
     Vector3 findFood(float radius)
     {
         Debug.Log("looking in radius: " + radius.ToString());
-        LayerMask food = LayerMask.NameToLayer("Food");
+        LayerMask food = 1 << LayerMask.NameToLayer("Food");
         Collider[] found = Physics.OverlapSphere(transform.position, radius, food);
         if (found.Length > 0)
         {
@@ -189,14 +204,16 @@ public class NPC : MonoBehaviour
         else
         {
             Debug.Log("looked in radius: " + radius.ToString());
-            return findFood(radius++);
+            radius++;
+            return findFood(radius);
         }
     }
 
 
     Vector3 randomPos()
     {
-        LayerMask decor = LayerMask.NameToLayer("Decor");
+        Debug.Log("we are going somewhere new");
+        LayerMask decor = 1 << LayerMask.NameToLayer("Decor");
         Vector3 pos;
         float minDist = 10.0f;
         float xDist = Random.Range(-20f, 20f);
@@ -225,15 +242,12 @@ public class NPC : MonoBehaviour
         Collider[] c = new Collider[] { };
         if (Physics.OverlapSphereNonAlloc(pos, 0.2f, c, decor) > 0)
         {
+            Debug.Log("it was inside something else let's look again");
             return randomPos();
         }
         return pos;
     }
 
-    void checkProgress()
-    {
-
-    }
 
     private bool targetReached()
     {
@@ -242,6 +256,7 @@ public class NPC : MonoBehaviour
         float range = state == NPCState.HUNGRY ? 0.5f : 2.0f;
         if (Vector3.Distance(flatTarget, flatPos) < range)
         {
+            Debug.Log("i think i've arrived boss");
             StartCoroutine(changeState(NPCState.IDLE));
             return true;
         }
@@ -253,8 +268,8 @@ public class NPC : MonoBehaviour
     {
         if (collider.tag == "Food")
         {
-            hunger += collider.GetComponent<FoodGen>().quality;
-            StartCoroutine(collider.GetComponent<FoodGen>().Eat());
+            hunger += collider.transform.parent.gameObject.GetComponent<FoodGen>().quality;
+            StartCoroutine(collider.transform.parent.gameObject.GetComponent<FoodGen>().Eat());
         }
 
     }
